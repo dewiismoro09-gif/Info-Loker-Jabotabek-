@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info Loker Jabodetabek - Galeri Lowongan Kerja</title>
+    <!-- Menggunakan Tailwind CSS untuk desain yang cepat dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-briefcase text-2xl text-yellow-300"></i>
+                <h1 class="text-2xl font-bold tracking-wide">infoloker<span class="text-yellow-300">jabodetabek</span></h1>
+            </div>
+            <p class="text-sm bg-blue-700 px-3 py-1 rounded-full text-blue-100">
+                Pusat Informasi Lowongan Kerja Terupdate
+            </p>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        
+        <!-- Section Upload -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-xl mx-auto mb-10">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up text-blue-500"></i> Upload Foto Loker Baru
+            </h2>
+            
+            <div class="space-y-4">
+                <!-- Input Judul/Keterangan Singkat -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Judul / Posisi Pekerjaan</label>
+                    <input type="text" id="jobTitle" placeholder="Contoh: Admin Gudang - Bekasi" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                </div>
+
+                <!-- Input File Gambar -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Pilih Foto Info Loker</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fa-solid fa-image text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-xs text-gray-500"><span class="font-semibold">Klik untuk upload</span> atau drag and drop</p>
+                                <p class="text-xs text-gray-400">PNG, JPG, atau JPEG</p>
+                            </div>
+                            <input id="imageInput" type="file" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Preview Gambar Sebelum di-upload -->
+                <div id="previewContainer" class="hidden text-center">
+                    <p class="text-xs text-gray-500 mb-2">Preview Gambar:</p>
+                    <img id="imagePreview" src="#" alt="Preview" class="max-h-40 mx-auto rounded-lg shadow-sm border">
+                </div>
+
+                <!-- Tombol Upload -->
+                <button onclick="uploadLoker()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Tambahkan ke Galeri
+                </button>
+            </div>
+        </section>
+
+        <hr class="border-gray-200 mb-10">
+
+        <!-- Section Galeri -->
+        <section>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-images text-blue-600"></i> Galeri Lowongan Kerja
+                </h2>
+                <button onclick="clearAllLoker()" class="text-xs text-red-500 hover:text-red-700 underline font-medium">
+                    Hapus Semua
+                </button>
+            </div>
+
+            <!-- Pesan jika galeri kosong -->
+            <div id="emptyMessage" class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <i class="fa-regular fa-folder-open text-gray-300 text-5xl mb-3"></i>
+                <p class="text-gray-500">Belum ada info loker yang di-upload. Yuk tambahkan di atas!</p>
+            </div>
+
+            <!-- Grid Galeri Foto -->
+            <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Foto loker akan muncul di sini secara dinamis -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 text-center py-4 text-sm mt-12 border-t border-gray-700">
+        <p>&copy; 2026 <span class="font-semibold text-white">infolokerjabodetabek</span>. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript Logika Web -->
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('previewContainer');
+        const jobTitleInput = document.getElementById('jobTitle');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const emptyMessage = document.getElementById('emptyMessage');
+
+        let base64Image = "";
+
+        // Fungsi menampilkan preview saat gambar dipilih
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Image = e.target.result;
+                    imagePreview.src = base64Image;
+                    previewContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Fungsi menyimpan dan menampilkan info loker baru
+        function uploadLoker() {
+            const title = jobTitleInput.value.trim();
+            
+            if (!title) {
+                alert("Harap isi judul atau posisi pekerjaan terlebih dahulu!");
+                return;
+            }
+            if (!base64Image) {
+                alert("Harap pilih foto info loker terlebih dahulu!");
+                return;
+            }
+
+            // Ambil data yang sudah ada di localStorage
+            let lokerList = JSON.parse(localStorage.getItem('lokerData')) || [];
+            
+            // Tambahkan data baru ke array di posisi paling depan (terbaru)
+            lokerList.unshift({
+                id: Date.now(),
+                title: title,
+                image: base64Image,
+                date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+            });
+
+            // Simpan kembali ke localStorage
+            localStorage.setItem('lokerData', JSON.stringify(lokerList));
+
+            // Reset Form
+            jobTitleInput.value = "";
+            imageInput.value = "";
+            base64Image = "";
+            previewContainer.classList.add('hidden');
+
+            // Refresh tampilan galeri
+            loadGallery();
+        }
+
+        // Fungsi memuat galeri dari localStorage
+        function loadGallery() {
+            let lokerList = JSON.parse(localStorage.getItem('lokerData')) || [];
+            galleryGrid.innerHTML = "";
+
+            if (lokerList.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                return;
+            } else {
+                emptyMessage.classList.add('hidden');
+            }
+
+            lokerList.forEach(loker => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition duration-300 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden group h-64 bg-gray-100 flex items-center justify-center">
+                            <img src="${loker.image}" alt="${loker.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute top-2 right-2">
+                                <button onclick="deleteLoker(${loker.id})" class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow transition">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800 text-base leading-snug line-clamp-2">${loker.title}</h3>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 pt-2 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span><i class="fa-regular fa-calendar-days mr-1"></i> ${loker.date}</span>
+                        <span class="text-blue-500 font-medium">Aktif</span>
+                    </div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Fungsi menghapus satu item loker
+        function deleteLoker(id) {
+            if(confirm("Apakah Anda yakin ingin menghapus lowongan ini?")) {
+                let lokerList = JSON.parse(localStorage.getItem('lokerData')) || [];
+                lokerList = lokerList.filter(item => item.id !== id);
+                localStorage.setItem('lokerData', JSON.stringify(lokerList));
+                loadGallery();
+            }
+        }
+
+        // Fungsi menghapus semua data loker
+        function clearAllLoker() {
+            if(confirm("Apakah Anda yakin ingin mengosongkan semua isi galeri loker?")) {
+                localStorage.removeItem('lokerData');
+                loadGallery();
+            }
+        }
+
+        // Load galeri saat pertama kali halaman dibuka
+        window.onload = loadGallery;
+    </script>
+</body>
+</html>
